@@ -1,13 +1,15 @@
+require 'nokogiri'
 module InnowhiteLib
 
   class Innowhite
    
     attr_accessor :mod_name, :org_name, :sub, :server_address, :private_key
         
-    def initialize(mod_name, org_name = nil)
+    def initialize(mod_name, org_name = nil, parent_org = "innowhite")
       load_settings
       @mod_name = mod_name.gsub(/ /,'')
       @org_name = org_name unless org_name.blank?
+      @parent_org = parent_org
     end
 
     def load_settings
@@ -46,12 +48,26 @@ module InnowhiteLib
       return address
     end
 
+    def get_sessions(status)
+      ids = []
+      descs = []
+      res = []
+      x = Nokogiri::XML(open("http://innowhite.com/get_active_session?orgName=#{@org_name}&status=#{status}"))      
+      x.xpath('//web-session/session-id').each{|m| ids << m.text}            
+      x.xpath('//web-session/session-desc').each{|m| descs << m.text}
+      
+      ids.each_with_index do |id, index|
+        res << {:id => id, :description => descs[index]}
+      end
+      return res
+    end
+
     private
 
     def join_room_helper(server_addr, org_name, room_id,user, is_teacher)
       action = "#{server_addr}JoinRoom?"
       address = "parentOrg=innowhite&orgName=#{org_name}&roomId=#{room_id}&user=#{user}&roomLeader=#{is_teacher}"
-      checksum =address+@private_key
+      checksum = address+@private_key
       return "#{action}#{address}&checksum=#{generating_checksum(checksum)}"
     end
 
