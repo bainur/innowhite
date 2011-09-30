@@ -2,7 +2,7 @@
 
 Gem::Specification.new do |s|
   s.name = %q{innowhite}
-  s.version = "0.1.0"
+  s.version = "1.0.1"
 
   s.required_rubygems_version = Gem::Requirement.new(">= 1.2") if s.respond_to? :required_rubygems_version=
   s.authors = [%q{bainur}]
@@ -16,7 +16,9 @@ Gem::Specification.new do |s|
   s.require_paths = [%q{lib}]
   s.rubyforge_project = %q{innowhite}
   s.rubygems_version = %q{1.8.6}
-  s.summary = %q{Innowhite Api}
+  s.summary = %q{Gem for Innowhite Api}
+  s.add_dependency 'nokogiri', '1.5.0'
+  s.add_dependency 'rest-client', '1.6.3'
 
   if s.respond_to? :specification_version then
     s.specification_version = 3

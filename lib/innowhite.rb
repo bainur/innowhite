@@ -13,7 +13,7 @@ class Innowhite
   end
 
   def load_settings
-    settings = YAML.load_file('config/innowhite_test.yml')
+    settings = YAML.load_file('config/innowhite.yml')
     @server_address = settings["innowhite"]["server_address"]
     @api_address = settings["innowhite"]["api_address"]
     @private_key = settings["innowhite"]["private_key"]
