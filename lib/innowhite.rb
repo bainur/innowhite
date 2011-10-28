@@ -256,7 +256,7 @@ class Innowhite
   def join_room_helper(server_addr, org_name, room_id,user, is_teacher)
     action = "#{server_addr}JoinRoom?"
     address = "parentOrg=#{@parent_org}&orgName=#{org_name}&roomId=#{room_id}&user=#{user}&roomLeader=#{is_teacher}"
-    checksum = address+@private_key
+    checksum = address#+@private_key
     return "#{action}#{address}&checksum=#{generating_checksum(checksum)}"
   end
 
