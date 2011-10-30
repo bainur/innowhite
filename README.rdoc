@@ -1,7 +1,3 @@
-                                    
-                                                                     
-                                                                     
-                                             
 Getting Started
 
 Install it with RubyGems
@@ -23,34 +19,176 @@ Available Command Requests
 
 Then we could access the available methods from the instance :
 
-Get the sessions list
-  Get the list of existing sessions.
-
-  Required Parameters :
-  No parameter needed
-
-  Command :
-    innowhite.get_sessions
-
-
-Create new room session
+Create new session :
   Create new room and get its room url to access it.
 
-  Required Parameters :
-  - Username of the user.
+  Arguments (as a Hash) : 
+  a. :user => the name of the moderator (ex. "John")
+  b. :parentOrg => (mandatory) The name of the parent organization. ("innowhite" as default.)
+  b. :orgName => (optional) Organization name (same as :parentOrg by default).
+  c. :tags => (optional). Example : (math 101, calculus, integration)
+  d. :desc => (optional) Description of the room. (ex: Definite Integrals by John)	
 
-  Command :
-    innowhite.create_room(:user => "the username")
+  Request Command :
+  innowhite.create_room({}). Ex : innowhite.create_room({:user => "bainur", :parentOrg => "innowhite", :orgName => "41studio", :tags => "testing, room testing", :desc => "This is only testing for the room"})
+
+  Return value :
+  a. Room Id
+  b. URL  (this URL will be passed to user so that he needs to be redirected to open in new page.)
 
 
-Join Existing Room
+
+
+Join an existing session
   Joining the existing room and get its room url to access it.
 
-  Required parameters :
-  - The room id which want to join.
-  - Username of the user who want to join the room
+  Arguments :
+  - room_id => (mandatory) The room id which want to join.
+  - username => (mandatory) Username of the user who want to join the room.
 
-  Command
-    innowhite.join_meeting("the room id", "the username")
+  Request Command :
+    innowhite.join_meeting(room_id, username). Ex : innowhite.join_meeting(12345, "bainur")
+
+
+
+
+
+
+Get the live sessions
+  Get the list of existing sessions.
+
+  Arguments (as a Hash) :
+  a. :tags (optional)
+  b. :orgName  (optional)
+  c. :parentOrg (mandatory)
+  d. :user (optional)
+
+  Request Command :
+    innowhite.get_sessions({})
+
+  Return value :
+  a. RoomId
+  b. Room Description
+  c. All tags associated with this room.
+  d. Room Created by.
+  e. Room start time.
+
+
+
+
+
+Schedule a session :
+  Scheduling new session.
+  
+  Arguments (as a Hash) :
+  a. :tags   (optional)
+  b. :orgName  (optional)
+  c. :parentOrg  (mandatory)
+  d. :startTime (format should be in milliseconds)
+  e. :timeZone (GMT time zone )  (ex : +1, +2) 
+  f. :endTime (format should be in milliseconds)
+  g. :user
+  h. :description
+  
+  Request Command :
+    innowhite.schedule_meeting({})
+
+  Return Value :
+  a. True or False
+
+
+
+
+
+
+
+Get the past sessions
+  Get the list of past sessions.
+
+  Arguments (as a Hash) :
+  a. :tags (optional)
+  b. :orgName  (optional)
+  c. :parentOrg (mandatory)
+  d. :user (optional)
+
+  Request Command :
+    innowhite.past_sessions({})
+  
+
+  Return Value :
+  a. tags   (optional)
+  b. orgName  (optional)
+  c. Moderator Name
+  d. Room Description
+  e. Link to play the video.
+
+
+
+
+
+
+
+
+Get the scheduled sessions
+  Get the list of scheduled sessions.
+
+  Arguments (as a Hash) :
+  a. :tags (optional)
+  b. :orgName  (optional)
+  c. :parentOrg (mandatory)
+
+  Request Command :
+    innowhite.get_scheduled_list({})
+
+  Return Value:
+  a. Tags   (optional)
+  b. orgName  (optional)
+  c. Start time (format should be in milliseconds) 
+  d. Time zone (GMT time zone )  (ex : +1, +2)
+  e. End time (format should be in milliseconds)
+  f. Moderator name
+  g. Room Description
+
+
+
+
+
+
+
+Cancel scheduled session
+  Cancel the scheduled session.
+
+  Arguments :
+  a. room_id (mandatory)
+
+  Request Command :
+    innowhite.cancel_meeting(room_id)
+
+  Return Value:
+  a. True or False
+
+
+
+
+
+
+Update a scheduled session :
+  Updating the exist scheduled session.
+  
+  Arguments (as a Hash) :
+  a. :room_id   (mandatory)
+  b. :startTime (format should be in milliseconds)  (optional)
+  c. :timeZone (optional)
+  d. :endTime (format should be in milliseconds) (optional)
+  e. :description (optional)
+  f. :tags (optional)
+  
+  Request Command :
+    innowhite.update_schedule({})
+
+  Return Value :
+  a. True or False
+
+
 
 
