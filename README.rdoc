@@ -1,1 +1,56 @@
-this is version beta of the gem
+                                    
+                                                                     
+                                                                     
+                                             
+Getting Started
+
+Install it with RubyGems
+
+gem install innowhite
+
+or add this to your Gemfile if you use Bundler:
+
+gem "innowhite"
+
+
+
+First of all, we need to initialize the Innowhite class
+
+innowhite = Innowhite.new
+
+
+Available Command Requests
+
+Then we could access the available methods from the instance :
+
+Get the sessions list
+  Get the list of existing sessions.
+
+  Required Parameters :
+  No parameter needed
+
+  Command :
+    innowhite.get_sessions
+
+
+Create new room session
+  Create new room and get its room url to access it.
+
+  Required Parameters :
+  - Username of the user.
+
+  Command :
+    innowhite.create_room(:user => "the username")
+
+
+Join Existing Room
+  Joining the existing room and get its room url to access it.
+
+  Required parameters :
+  - The room id which want to join.
+  - Username of the user who want to join the room
+
+  Command
+    innowhite.join_meeting("the room id", "the username")
+
+
