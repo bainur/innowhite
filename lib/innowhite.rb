@@ -13,7 +13,9 @@ class Innowhite
   end
 
   def load_settings
-    settings = YAML.load_file('config/innowhite.yml')
+    if RAILS_ENV == "development"
+      settings = YAML.load_file('config/innowhite_test.yml')
+    end
     @server_address = settings["innowhite"]["server_address"]
     @api_address = settings["innowhite"]["api_address"]
     @private_key = settings["innowhite"]["private_key"]
@@ -43,7 +45,7 @@ class Innowhite
   def create_room_info(room_id,user,tags,desc, parent_org,address)
     checksum_tmp = "parentOrg=#{parent_org}&orgName=#{parent_org}"
     checksum = generating_checksum(URI.escape(checksum_tmp))
-    
+
     res = RestClient.post("#{@api_address}create_room_info",
       {:roomId => room_id, :user => user, :tags => tags,:desc => desc,
         :parentOrg => parent_org, :address => address, :orgName => parent_org,
@@ -55,7 +57,7 @@ class Innowhite
 
   def set_room_id
     room_id = ""
-    url = "#{@server_address}CreateRoom?parentOrg=#{@parent_org}&orgName=#{@org_name}&user=#{@mod_name}&checksum=#{generate_checksum(@parent_org,@org_name, @mod_name)}"    
+    url = "#{@server_address}CreateRoom?parentOrg=#{@parent_org}&orgName=#{@org_name}&user=#{@mod_name}&checksum=#{generate_checksum(@parent_org,@org_name, @mod_name)}"
     doc = Nokogiri::XML(open(url))
     status = doc.xpath('//returnStatus').text.gsub("\n","") rescue ""
     if status.include?('SUCCESS')
@@ -78,16 +80,16 @@ class Innowhite
     missing = false
     if doc.text.blank?
       missing = true
-    end    
+    end
     address = join_room_helper(@server_address,@org_name, room_id, user, false)
     if missing
       raise "Room is not exist / Expired"
     else
       return address
     end
-    
+
   end
-  
+
   def past_sessions(params = {})
     begin
       params[:parentOrg] ||= @parent_org
@@ -116,7 +118,7 @@ class Innowhite
       return "Error fetching sessions check the organization and private key .."
     end
   end
-  
+
   def get_sessions(params = {})
     begin
     params[:parentOrg] ||= @parent_org
@@ -132,9 +134,9 @@ class Innowhite
     tags = params[:tags]
     descs = []
     res = []
-    checksum_tmp = "parentOrg=#{parent_org}&orgName=#{org_name1}"    
+    checksum_tmp = "parentOrg=#{parent_org}&orgName=#{org_name1}"
     tmp = "parentOrg=#{parent_org}&orgName=#{org_name1}&user=#{user}&tags=#{tags}"
-    checksum = generating_checksum(URI.escape(checksum_tmp))    
+    checksum = generating_checksum(URI.escape(checksum_tmp))
     url = URI.escape("#{@api_address}list_sessions?#{tmp}&checksum=#{checksum}")
 
     x = Nokogiri::XML(open(url))
@@ -164,14 +166,14 @@ class Innowhite
     desc = params[:description]
     room_id = set_room_id
 
-    address = join_room_helper(@server_address,@org_name, room_id, user,true)    
+    address = join_room_helper(@server_address,@org_name, room_id, user,true)
     create_schedule(room_id, user, tags,desc, @parent_org, address,start_time,end_time, time_zone)
   end
 
   def create_schedule(room_id,user,tags,desc, parent_org,address, start_time, end_time, time_zone)
     checksum_tmp = "parentOrg=#{parent_org}&orgName=#{parent_org}"
     checksum = generating_checksum(URI.escape(checksum_tmp))
-    address = join_room_helper(@server_address,@org_name, room_id, user,true)    
+    address = join_room_helper(@server_address,@org_name, room_id, user,true)
     res = RestClient.post("#{@api_address}create_schedule_meeting",
       {:roomId => room_id, :user => user, :tags => tags,:desc => desc,:startTime => start_time,
         :endTime => end_time, :timeZone => time_zone,
@@ -186,18 +188,18 @@ class Innowhite
     @org_name ||= params[:orgName]
     checksum = main_cheksum(@parent_org, @org_name)
     tags = params[:tags] if params[:tags]
-    
+
     par = url_generator(@parent_org, @org_name)
     url = URI.escape("#{@api_address}get_scheduled_sessions?#{par}&checksum=#{checksum}&tags=#{tags}")
     x = Nokogiri::XML(open(url))
     ids = [], start_at = [], end_at = [], zone = []
     desc = []
     x.xpath('//web-session/session-id').each{|m| ids << m.text}
-    x.xpath('//web-session/session-desc').each{|m| desc << m.text}    
+    x.xpath('//web-session/session-desc').each{|m| desc << m.text}
     x.xpath('//web-session/start-at').each{|m| start_at << m.text.to_time.to_i rescue 0}
     x.xpath('//web-session/end-at').each{|m| end_at << m.text.to_time.to_i rescue 0}
     x.xpath('//web-session/start-at').each{|m| zone << m.text.to_datetime.utc_offset rescue 0}
-    
+
     res = []
     ids.each_with_index do |id, index|
       res << {
@@ -223,7 +225,7 @@ class Innowhite
   end
 
   def update_schedule(params = {})
-    checksum = main_cheksum(@parent_org, @org_name)    
+    checksum = main_cheksum(@parent_org, @org_name)
     room_id = params[:room_id]
     start_time = params[:startTime] if params[:startTime]
     time_zone = params[:timeZone] if params[:timeZone]
@@ -256,11 +258,14 @@ class Innowhite
   def join_room_helper(server_addr, org_name, room_id,user, is_teacher)
     action = "#{server_addr}JoinRoom?"
     address = "parentOrg=#{@parent_org}&orgName=#{org_name}&roomId=#{room_id}&user=#{user}&roomLeader=#{is_teacher}"
-    checksum = address#+@private_key
+
+    checksum = address
+    pp "address = #{address}"
+    pp "checksum = #{checksum}"
     return "#{action}#{address}&checksum=#{generating_checksum(checksum)}"
   end
 
-  def generating_checksum(params)    
+  def generating_checksum(params)
     Digest::SHA1.hexdigest(params+@private_key)
   end
 
